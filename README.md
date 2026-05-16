@@ -1,114 +1,126 @@
-[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/CiscoTestAutomation/pyats-docker)
+# HENICOM Website (Estático)
 
-# pyATS Dockerfile and Scripts
+## Descrição do projeto
+Website institucional estático da HENICOM, construído com **HTML + CSS + JavaScript vanilla**, focado em posicionamento enterprise para infraestrutura tecnológica em África.
 
-This is the Git repo for the official pyATS test framework Docker image. This 
-repository contains Dockerfiles and scripts used to build the actual image, 
-available as `ciscotestautomation/pyats` tag on Dockerhub.
+Arquivos principais:
+- `index.html` — homepage (hero, soluções, diferenciais, indústrias, parceiros, casos, insights, CTA final, footer).
+- `webassets/styles.css` — estilos globais e componentes reutilizáveis.
+- `webassets/videocontrols.css` — estilos do bloco de vídeo.
+- `webassets/app.js` — ano dinâmico no rodapé + persistência do progresso do vídeo com IndexedDB.
+- `webassets/angola-network.svg` e `webassets/angola-team.svg` — ilustrações institucionais.
 
-## General Information
+---
 
-- Website: https://developer.cisco.com/site/pyats/
-- Documentation: https://developer.cisco.com/site/pyats/docs/
-- Dockerhub: https://hub.docker.com/r/ciscotestautomation/pyats/
+## Resumo por ficheiro (por bloco lógico)
 
-## How to Use the pyATS Docker Image
+### 1) `index.html`
+- **`<head>`**: define metadados básicos de SEO (`title`, `description`) e carrega `styles.css` + `videocontrols.css`.
+- **Navegação (`.nav`)**: links para secções da homepage e páginas internas (`industries`, `about`, `contact`).
+- **Hero (`.hero`)**: headline principal enterprise + CTA técnico.
+- **“O que fazemos”**: posicionamento institucional focado em continuidade operacional.
+- **“Soluções principais”**: cards com links para páginas de solução em `/solutions/`.
+- **“Diferenciais”**: blocos de valor orientados a operação crítica e execução local.
+- **“Indústrias atendidas”**: lista setorial (banca, indústria, educação, etc.).
+- **Bloco visual + vídeo**:
+  - duas imagens SVG com `loading="lazy"`;
+  - vídeo com `id="demo-video"`, `controls`, `playsinline`, `preload="metadata"`.
+- **Footer**: colunas com informações institucionais + ano dinâmico (`data-year`).
+- **WhatsApp**: link `wa.me` com `target="_blank" rel="noopener noreferrer"`.
 
-#### Downloading the Image
+### 2) `webassets/styles.css`
+- **Variáveis CSS (`:root`)**: paleta principal (azul petróleo, grafite, cyan, branco).
+- **Layout base**: container, secções, grid, cards.
+- **Componentes**: botões (`btn-primary`, `btn-cyan`), navegação sticky, hero, footer.
+- **Responsividade**: breakpoint mobile em `@media(max-width:900px)`.
 
-Downloading the pyATS image in a separate step is not strictly necessary, but is
-a good practise to ensure your local image is always kept up-to-date.
+### 3) `webassets/videocontrols.css`
+- Estiliza o bloco `.video-demo` e o `<video>` para manter consistência visual enterprise.
 
+### 4) `webassets/app.js`
+- **Bloco 1**: atualiza ano do footer automaticamente.
+- **Bloco 2 (IndexedDB)**:
+  - abre DB `henicom-media` e store `videoProgress`;
+  - restaura `currentTime` do vídeo `#demo-video`;
+  - guarda progresso no evento `timeupdate`;
+  - limpa progresso no evento `ended`.
+
+---
+
+## Como executar localmente
+
+### Opção A — Python
+```bash
+python -m http.server 8000
 ```
-$ docker pull ciscotestautomation/pyats:latest
+Abrir: `http://localhost:8000/index.html`
+
+### Opção B — Node (http-server)
+```bash
+npx http-server . -p 8000
 ```
+Abrir: `http://localhost:8000/index.html`
 
-where the `latest` tag can be replace with the specific version of pyATS you 
-need. 
+> Evite abrir com `file://` quando testar comportamentos de vídeo/IndexedDB.
 
-#### Starting the pyATS Container
+---
 
-The pyATS docker container defaults to starting in Python interactive shell. 
+## Como testar a funcionalidade do vídeo (IndexedDB)
 
-```
-$ docker run -it ciscotestautomation/pyats:latest
-[Entrypoint] Starting pyATS Docker Image ...
-[Entrypoint] Workspace Directory: /pyats
-[Entrypoint] Activating workspace
-Python 3.4.7 (default, Nov  4 2017, 22:21:42)
-[GCC 4.9.2] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>>
-```
+1. Abra `index.html` via servidor local.
+2. No bloco “Demonstração técnica”, carregue um ficheiro de vídeo real no `<source>` (ou substitua por URL válida).
+3. Reproduza alguns segundos e recarregue a página.
+4. Verifique se o vídeo retoma próximo do ponto anterior.
+5. Deixe o vídeo terminar e recarregue.
+6. Verifique que o progresso foi limpo.
 
-Alternatively, you can also start the container in shell,
-```
-$ docker run -it ciscotestautomation/pyats:latest /bin/bash
-[Entrypoint] Starting pyATS Docker Image ...
-[Entrypoint] Workspace Directory: /pyats
-[Entrypoint] Activating workspace
-root@0c832ac21322:/pyats#
-```
-
-The pyATS virtual environment is sourced automatically, and your workspace is
-preset to be `/pyats`. Note that this workspace directory (virtual environment) 
-is declared to be a docker volume, so its content will persist between container
-reloads.
-
-To get out of the container, try `CTRL-D`.
-
-#### Examples and Templates
-
-Examples and templates are built into the image under `/pyats` default workspace
-to help users on getting started. 
-
-```
-$ docker run -it ciscotestautomation/pyats:latest /bin/bash
-[Entrypoint] Starting pyATS Docker Image ...
-[Entrypoint] Workspace Directory: /pyats
-[Entrypoint] Activating workspace
-root@0c832ac21322:/pyats# easypy examples/basic/job/basic_example_job.py
-```
-
-## Customizing Your Container
-
-You can use the following built-in mechanisms to customize your container before
-startup, and have your environment setup automatically.
-
-#### requirements.txt
-
-To populate your newly started containers with pip packages, you can customize
-your container by mounting a pip requirements file to `/pyats/requirements.txt`.
-When a container is first created, this required package file is automatically 
-provided to `pip` to fulfill.
-
-```
-$ docker run -it -v /your/requirements.txt:/pyats/requirements.txt ciscotestautomation/pyats:latest
-[Entrypoint] Starting pyATS Docker Image ...
-[Entrypoint] Workspace Directory: /pyats
-[Entrypoint] Activating workspace
-[Entrypoint] Installing pip packages: /pyats/requirements.txt
-Collecting requests==2.12.3 (from -r /pyats/requirements.txt (line 1))
-...
+### Limpar manualmente progresso do vídeo
+No DevTools Console:
+```js
+indexedDB.deleteDatabase('henicom-media')
 ```
 
-#### workspace.init
+---
 
-For any other customization you need to do to your container workspace, such
-as pulling git repositories and setting up source code in development mode, 
-you can mount a custom bash script to `/pyats/workspace.init`. This file is
-automatically executed as part of container initial creation.
+## Links/endereços a validar (QA funcional)
 
-```
+- `mailto:contact@henicom.com` (abre cliente de email)
+- `tel:+244926151340` (em dispositivos compatíveis)
+- `https://wa.me/244926151340?...` (abre WhatsApp)
 
-$ docker run -it -v /your/workspace.init:/pyats/workspace.init ciscotestautomation/pyats:latest
-[Entrypoint] Starting pyATS Docker Image ...
-[Entrypoint] Workspace Directory: /pyats
-[Entrypoint] Activating workspace
-[Entrypoint] Running workspace init: /pyats/workspace.init
-custom initialization
-...
-```
+Checklist rápido:
+- [ ] Links internos navegam sem 404.
+- [ ] WhatsApp abre em nova aba com segurança (`noopener noreferrer`).
+- [ ] Footer mostra ano atual automaticamente.
+- [ ] Layout mobile sem sobreposição.
 
-For a more elaborate example of the `workspace.init` file, see `templates/` 
-folder under this repository.
+---
+
+## Compatibilidade
+
+- **IndexedDB**: suportado nos browsers modernos (Chrome, Edge, Firefox, Safari recentes).
+- Em navegadores sem IndexedDB, o site continua funcional; apenas a restauração de progresso do vídeo não é aplicada.
+
+---
+
+## TODOs recomendados (prioridade)
+
+### Alta
+1. Definir um ficheiro de vídeo real otimizado (MP4/H.264) e poster.
+2. Adicionar fallback explícito para browsers sem IndexedDB (exibir aviso curto).
+3. Melhorar acessibilidade: landmarks ARIA, foco visível e contraste em todos os botões.
+
+### Média
+4. Comprimir SVGs (`svgo`) e ativar cache longa para assets estáticos.
+5. Criar página de erro 404 customizada.
+6. Adicionar sitemap.xml e robots.txt para SEO técnico.
+
+### Baixa
+7. Evoluir para componentes de template estático (partials) para reduzir duplicação entre páginas.
+
+---
+
+## Prompt curto para gerar imagens profissionais (uso em outro modelo)
+Cria 3 imagens hero institucionais para uma empresa africana de infraestrutura tecnológica chamada HENICOM. O estilo deve ser enterprise premium, com paleta azul petróleo, grafite, branco e cyan discreto. Evita visual B2C. Mostra ambientes de conectividade crítica, cloud híbrida, NOC/datacenter e equipas técnicas africanas em contexto profissional real.
+
+As imagens devem transmitir continuidade operacional, segurança, escalabilidade e modernização sustentável. Composição limpa, iluminação corporativa, detalhes de dashboards e redes, formato 16:9 (1920x1080), espaço negativo para headline e CTA no lado esquerdo.
